@@ -93,4 +93,24 @@ UserSchema.methods.isFavorite = id => {
   });
 };
 
+UserSchema.methods.follow = id => {
+  if (this.following.indexOf(id) === -1) {
+    this.following.push(id);
+  }
+
+  return this.save();
+};
+
+UserSchema.methods.unfollow = id => {
+  this.following.remove(id);
+
+  return this.save();
+};
+
+UserSchema.methods.isFollowing = id => {
+  return this.following.some(followId => {
+    return followId.toString() === id.toString();
+  });
+};
+
 module.exports = User = mongoose.model("User", UserSchema);
