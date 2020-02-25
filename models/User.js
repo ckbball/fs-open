@@ -81,4 +81,16 @@ UserSchema.methods.favorite = id => {
   return this.save();
 };
 
+UserSchema.methods.unfavorite = id => {
+  this.favorites.remove(id);
+
+  return this.save();
+};
+
+UserSchema.methods.isFavorite = id => {
+  return this.favorites.some(favoriteId => {
+    return favoriteId.toString() === id.toString();
+  });
+};
+
 module.exports = User = mongoose.model("User", UserSchema);
