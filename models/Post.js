@@ -11,10 +11,14 @@ const PostSchema = new mongoose.Schema(
       unique: true
     },
     title: {
-      type: String
+      type: String,
+      minLength: 4,
+      maxLength: 32
     },
     content: {
-      type: String
+      type: String,
+      minLength: 16,
+      maxLength: 256
     },
     favoritesCount: {
       type: Number,
