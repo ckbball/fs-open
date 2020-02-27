@@ -6,6 +6,8 @@ const gravatar = require("gravatar");
 const jwt = require("jsonwebtoken");
 const config = require("config");
 
+const auth = require("../../middleware/auth");
+
 const User = require("../../models/User");
 
 // @route   POST api/users
@@ -66,7 +68,8 @@ router.post(
 
       const payload = {
         user: {
-          id: user.id
+          id: user.id,
+          email: user.email
         }
       };
 
@@ -85,5 +88,55 @@ router.post(
     }
   }
 );
+
+// @route   POST api/users/user
+// @desc    Update user
+// @access  Private
+router.post("/user", auth, async (req, res) => {
+  const { name, email, password, bio } = req.body;
+
+  const userId = req.user.id;
+
+  if (email === "") {
+    console.log("haha email gone");
+  }
+
+  try {
+    user = await User.findById(userId);
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    const salt = await bcrypt.genSalt(12);
+
+    if (typeof password !== "undefined" && password.length > 6) {
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    if (typeof name !== "undefined") {
+      user.name = name;
+    }
+
+    if (typeof bio !== "undefined") {
+      user.bio = bio;
+    }
+    if (email === "") {
+      console.log("email is blank");
+      user.email = email;
+      const avatar = gravatar.url(email, {
+        s: "200",
+        r: "pg",
+        d: "mm"
+      });
+      user.avatar = avatar;
+    }
+
+    await user.save();
+    res.json({ user: user.toAuthJSON() });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
 
 module.exports = router;

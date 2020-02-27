@@ -39,6 +39,7 @@ const UserSchema = new mongoose.Schema(
 
 UserSchema.plugin(uniqueValidator, { message: "is already taken." });
 
+// called when logged in user is requesting another user's profile
 UserSchema.methods.toProfileJSONFor = user => {
   return {
     name: this.name,
@@ -49,6 +50,7 @@ UserSchema.methods.toProfileJSONFor = user => {
   };
 };
 
+// called when logged in user is requesting their own profile
 UserSchema.methods.toAuthJSON = () => {
   let token = jwt.sign(
     payload,
