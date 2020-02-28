@@ -292,7 +292,7 @@ get comments a user has created by username   2 _______
 post a comment to a post      4 --- 
 remove a comment from a post      7 ---
 update a comment on a post      5
-get comments for a post     6
+get comments for a post     6 -----
 
 update a post   8
 delete a post   9
