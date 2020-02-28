@@ -193,9 +193,37 @@ router.delete("/:username/follow", auth, async (req, res) => {
 
     await user.save();
 
-    console.error("user after delete: " + user);
-
     return res.json({ profile: req.profile.toProfileJSONFor(user) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   GET api/users/:username
+// @desc    Get a user
+// @access  Private
+router.get("/:username", auth, async (req, res) => {
+  // id of profile to be retrieved
+  let profileId = req.profile._id;
+  try {
+    // user object of logged in user
+    let user = await User.findById(req.user.id);
+    if (!user) return res.sendStatus(401);
+
+    let profile = {};
+
+    let temp1 = user.id.toString();
+    let temp2 = profileId.toString();
+
+    let eq = temp1 === temp2;
+    if (temp1 === temp2) {
+      profile = req.profile.toAuthJSON();
+    } else {
+      profile = req.profile.toProfileJSONFor(user);
+    }
+
+    return res.json({ profile: profile });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");

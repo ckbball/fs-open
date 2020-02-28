@@ -61,13 +61,14 @@ UserSchema.methods.toProfileJSONFor = function(user) {
 
 // called when logged in user is requesting their own profile
 UserSchema.methods.toAuthJSON = function() {
-  console.error(this);
+  /*
   payload = {
     user: {
       id: this.id,
       email: this.email
     }
   };
+  /*
   let token = jwt.sign(
     payload,
     config.get("JWT_SECRET"),
@@ -79,7 +80,7 @@ UserSchema.methods.toAuthJSON = function() {
       }
       return token;
     }
-  );
+  );*/
 
   return {
     name: this.name,
@@ -91,7 +92,7 @@ UserSchema.methods.toAuthJSON = function() {
     following: this.following,
     favorites: this.favorites,
     comments: this.comments,
-    token: token
+    status: "my profile"
   };
 };
 
@@ -121,7 +122,6 @@ UserSchema.methods.follow = function(id) {
   if (this.following.indexOf(id) === -1) {
     this.following.push(id);
   }
-  console.error("UserSchema.follow this: " + this.following);
   return this.save;
 };
 
