@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
 const slug = require("slug");
-const User = mongoose.model("user");
+const User = mongoose.model("User");
 
 const PostSchema = new mongoose.Schema(
   {
@@ -72,4 +72,22 @@ PostSchema.methods.toJSONFor = function(user) {
   };
 };
 
-module.exports = User = mongoose.model("Post", PostSchema);
+module.exports = Post = mongoose.model("Post", PostSchema);
+
+// Post routes left
+/*
+get logged in user's own posts
+get comments logged in user has created
+get comments a user has created by username
+
+post a comment to a post
+remove a comment from a post
+update a comment on a post
+get comments for a post
+
+update a post
+delete a post
+favorite a post
+unfavorite a post
+
+*/

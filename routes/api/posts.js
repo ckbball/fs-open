@@ -65,6 +65,17 @@ router.get("/", async (req, res) => {
 // @access  Private
 router.post("/", auth, async (req, res) => {
   try {
+    let user = await User.findById(req.user.id);
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    let post = new Post(req.body.post);
+
+    post.author = user;
+    await post.save();
+    console.log(post.author);
+    res.json({ post: post.toJSONFor(user) });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");

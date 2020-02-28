@@ -3,7 +3,7 @@ const validate = require("mongoose-validator").validate;
 
 const CommentSchema = new mongoose.Schema(
   {
-    body: { type: String, validate: validate("len", 1, 128) },
+    body: { type: String, minLength: 1, maxLength: 128 },
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     post: { type: mongoose.Schema.Types.ObjectId, ref: "Post" }
   },
