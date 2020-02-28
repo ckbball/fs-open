@@ -33,7 +33,7 @@ router.get("/", async (req, res) => {
   let query = {};
   let limit = 20;
   let offset = 0;
-  console.error("calling /feed");
+  console.error("calling /");
 
   if (typeof req.query.limit !== "undefined") {
     limit = req.query.limit;
@@ -217,9 +217,10 @@ router.delete("/:post/comments/:comment", auth, async (req, res) => {
 // @route   GET api/posts/feed
 // @desc    Get List of a specific user's followed users posts
 // @access  Private
-router.get("/feed", auth, async (req, res) => {
+router.get("/feed/me", auth, async (req, res) => {
   let limit = 20;
   let offset = 0;
+  console.error("calling /feed");
 
   if (typeof req.query.limit !== "undefined") {
     limit = req.query.limit;
@@ -230,8 +231,6 @@ router.get("/feed", auth, async (req, res) => {
 
   try {
     let user = await User.findById(req.user.id);
-
-    console.error(user.following);
 
     let posts = await Post.find({ author: { $in: user.following } })
       .limit(Number(limit))
