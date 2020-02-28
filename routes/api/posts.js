@@ -214,6 +214,36 @@ router.delete("/:post/comments/:comment", auth, async (req, res) => {
   }
 });
 
+// @route   GET api/posts/:post/comments
+// @desc    Get comments of a post
+// @access  Private
+router.get("/:post/comments", async (req, res) => {
+  try {
+    let post = await req.post
+      .populate({
+        path: "comments",
+        populate: {
+          path: "author"
+        },
+        options: {
+          sort: {
+            createdAt: "desc"
+          }
+        }
+      })
+      .execPopulate();
+
+    return res.json({
+      comments: req.post.comments.map(comment => {
+        return comment.toJSONFor(null);
+      })
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 // @route   GET api/posts/feed
 // @desc    Get List of a specific user's followed users posts
 // @access  Private
@@ -255,9 +285,9 @@ module.exports = router;
 
 // Post routes left
 /*
-get logged in user's own posts    3
-get comments logged in user has created     1
-get comments a user has created by username   2
+get logged in user's own posts    3 ____
+get comments logged in user has created     1 ______
+get comments a user has created by username   2 _______
 
 post a comment to a post      4 --- 
 remove a comment from a post      7 ---
