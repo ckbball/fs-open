@@ -33,7 +33,6 @@ router.get("/", async (req, res) => {
   let query = {};
   let limit = 20;
   let offset = 0;
-  console.error("calling /");
 
   if (typeof req.query.limit !== "undefined") {
     limit = req.query.limit;
@@ -93,7 +92,6 @@ router.post("/", auth, async (req, res) => {
 
     post.author = user;
     await post.save();
-    console.log(post.author);
     res.json({ post: post.toJSONFor(user) });
   } catch (err) {
     console.error(err.message);
@@ -250,7 +248,6 @@ router.get("/:post/comments", async (req, res) => {
 router.get("/feed/me", auth, async (req, res) => {
   let limit = 20;
   let offset = 0;
-  console.error("calling /feed");
 
   if (typeof req.query.limit !== "undefined") {
     limit = req.query.limit;
