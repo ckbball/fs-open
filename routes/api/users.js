@@ -10,6 +10,15 @@ const auth = require("../../middleware/auth");
 
 const User = require("../../models/User");
 
+// preload user profile on routes with ':username'
+router.param("username", async (req, res, next, username) => {
+  let user = await User.findOne({ username: username });
+  if (!user) return res.sendStatus(404);
+
+  req.profile = user;
+  return next();
+});
+
 // @route   POST api/users
 // @desc    Register user
 // @access  Public
@@ -35,7 +44,7 @@ router.post(
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const { name, email, password } = req.body;
+    const { name, email, password, username } = req.body;
 
     try {
       let user = await User.findOne({ email });
@@ -59,7 +68,8 @@ router.post(
         name,
         email,
         avatar,
-        password
+        password,
+        username
       });
 
       user.password = await bcrypt.hash(password, salt);
@@ -93,7 +103,7 @@ router.post(
 // @desc    Update user
 // @access  Private
 router.post("/user", auth, async (req, res) => {
-  const { name, email, password, bio } = req.body;
+  const { name, email, password, bio, username } = req.body;
 
   const userId = req.user.id;
 
@@ -117,6 +127,10 @@ router.post("/user", auth, async (req, res) => {
       user.name = name;
     }
 
+    if (typeof username !== "undefined") {
+      user.username = username;
+    }
+
     if (typeof bio !== "undefined") {
       user.bio = bio;
     }
@@ -132,7 +146,56 @@ router.post("/user", auth, async (req, res) => {
     }
 
     await user.save();
+    console.error(user.toAuthJSON());
     res.json({ user: user.toAuthJSON() });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   POST api/users/:username/follow
+// @desc    Follow user
+// @access  Private
+router.post("/:username/follow", auth, async (req, res) => {
+  // id of profile to be followed
+  let profileId = req.profile._id;
+  try {
+    // user object of logged in user
+    let user = await User.findById(req.user.id);
+    if (!user) return res.sendStatus(401);
+
+    await user.follow(profileId);
+
+    await user.save();
+
+    console.error("user after save: " + user);
+
+    return res.json({ profile: req.profile.toProfileJSONFor(user) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   DELETE api/users/:username/follow
+// @desc    Un follow user
+// @access  Private
+router.delete("/:username/follow", auth, async (req, res) => {
+  // id of profile to be followed
+  let profileId = req.profile._id;
+  try {
+    // user object of logged in user
+    let user = await User.findById(req.user.id);
+    if (!user) return res.sendStatus(401);
+
+    await user.unfollow(profileId);
+
+    await user.save();
+
+    console.error("user after delete: " + user);
+
+    return res.json({ profile: req.profile.toProfileJSONFor(user) });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");

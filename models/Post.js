@@ -33,7 +33,7 @@ const PostSchema = new mongoose.Schema(
 
 PostSchema.plugin(uniqueValidator, { message: "is already taken." });
 
-PostSchema.pre("validate", next => {
+PostSchema.pre("validate", function(next) {
   if (!this.slug) {
     this.slugify();
   }
@@ -41,14 +41,14 @@ PostSchema.pre("validate", next => {
   next();
 });
 
-PostSchema.methods.slugify = () => {
+PostSchema.methods.slugify = function() {
   this.slug =
     slug(this.title) +
     "-" +
     ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
 };
 
-PostSchema.methods.updateFavoriteCount = async () => {
+PostSchema.methods.updateFavoriteCount = async function() {
   let post = this;
 
   const count = await User.count({ favorites: { $in: [post._id] } });
@@ -58,7 +58,7 @@ PostSchema.methods.updateFavoriteCount = async () => {
   return post.save();
 };
 
-PostSchema.methods.toJSONFor = user => {
+PostSchema.methods.toJSONFor = function(user) {
   return {
     slug: this.slug,
     title: this.title,
