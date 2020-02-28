@@ -185,6 +185,27 @@ router.post("/:post/comment", auth, async (req, res) => {
   }
 });
 
+// @route   DELETE api/posts/:post/comments/:comment
+// @desc    Delete a comment from a post
+// @access  Private
+router.delete("/:post/comments/:comment", auth, async (req, res) => {
+  try {
+    if (req.comment.author.toString() === req.user.id.toString()) {
+      req.post.comments.remove(req.comment._id);
+      await req.post.save();
+      await Comment.find({ _id: req.comment._id })
+        .remove()
+        .exec();
+      res.sendStatus(204);
+    } else {
+      res.sendStatus(403);
+    }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 module.exports = router;
 
 // Post routes left
