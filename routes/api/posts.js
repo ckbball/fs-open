@@ -161,7 +161,7 @@ router.delete("/:post/favorite", auth, async (req, res) => {
 // @route   POST api/posts/:post/comments
 // @desc    Comment on a post
 // @access  Private
-router.post("/:post/comment", auth, async (req, res) => {
+router.post("/:post/comments", auth, async (req, res) => {
   try {
     let user = await User.findById(req.user.id);
     if (!user) {
@@ -175,6 +175,10 @@ router.post("/:post/comment", auth, async (req, res) => {
     await comment.save();
 
     req.post.comments.push(comment);
+
+    user.comments.push(comment);
+
+    await user.save();
 
     let post = await req.post.save();
 
@@ -196,10 +200,49 @@ router.delete("/:post/comments/:comment", auth, async (req, res) => {
       await Comment.find({ _id: req.comment._id })
         .remove()
         .exec();
+      let user = await User.findById(req.user._id);
+      user.comments.remove(req.comment._id);
+      await user.save();
       res.sendStatus(204);
     } else {
       res.sendStatus(403);
     }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   GET api/posts/feed
+// @desc    Get List of a specific user's followed users posts
+// @access  Private
+router.get("/feed", auth, async (req, res) => {
+  let limit = 20;
+  let offset = 0;
+
+  if (typeof req.query.limit !== "undefined") {
+    limit = req.query.limit;
+  }
+  if (typeof req.query.offset !== "undefined") {
+    offset = req.query.offset;
+  }
+
+  try {
+    let user = await User.findOne({ username: req.user.id });
+
+    let posts = await Post.find({ author: { $in: user.following } })
+      .limit(Number(limit))
+      .skip(Number(offset))
+      .populate("author")
+      .exec();
+    let count = await Post.countDocuments({ author: { $in: user.following } });
+
+    return res.json({
+      posts: posts.map(post => {
+        return post.toJSONFor(user);
+      }),
+      postsCount: count
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -214,8 +257,8 @@ get logged in user's own posts    3
 get comments logged in user has created     1
 get comments a user has created by username   2
 
-post a comment to a post      4
-remove a comment from a post      7
+post a comment to a post      4 --- 
+remove a comment from a post      7 ---
 update a comment on a post      5
 get comments for a post     6
 

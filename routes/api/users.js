@@ -230,4 +230,53 @@ router.get("/:username", auth, async (req, res) => {
   }
 });
 
+// @route   GET api/users/:username/comments
+// @desc    Get List of Comments
+// @access  Public
+router.get("/:username/comments", async (req, res) => {
+  let query = {};
+  let limit = 20;
+  let offset = 0;
+
+  if (typeof req.query.limit !== "undefined") {
+    limit = req.query.limit;
+  }
+  if (typeof req.query.offset !== "undefined") {
+    offset = req.query.offset;
+  }
+  try {
+    let author = await User.findOne({ username: req.query.author });
+    let favoriter = await User.findOne({ username: req.query.favorited });
+
+    if (author) {
+      query.author = author._id;
+    }
+
+    if (favoriter) {
+      query._id = { $in: favoriter.favorites };
+    } else if (req.query.favorited) {
+      query._id = { $in: [] };
+    }
+
+    let comments = await Comment.find(query)
+      .limit(Number(limit))
+      .skip(Number(offset))
+      .sort({ createdAt: "desc" })
+      .populate("author")
+      .exec();
+    let count = await Comment.estimatedDocumentCount(query).exec();
+    let user = req.user ? User.findById(req.user.id) : null;
+
+    return res.json({
+      comments: comments.map(comment => {
+        return comment.toJSONFor(user);
+      }),
+      commentsCount: count
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 module.exports = router;
