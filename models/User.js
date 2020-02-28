@@ -96,6 +96,7 @@ UserSchema.methods.toAuthJSON = function() {
 };
 
 UserSchema.methods.favorite = function(id) {
+  if (typeof this.favorite === "undefined") this.favorite = [id];
   if (this.favorites.indexOf(id) === -1) {
     this.favorites.push(id);
   }
@@ -110,9 +111,9 @@ UserSchema.methods.unfavorite = function(id) {
 };
 
 UserSchema.methods.isFavorite = function(id) {
-  return this.favorites.some(favoriteId => {
-    return favoriteId.toString() === id.toString();
-  });
+  return this.favorites.filter(
+    favoriteId => favoriteId.toString() === id.toString()
+  );
 };
 
 UserSchema.methods.follow = function(id) {
