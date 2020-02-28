@@ -8,6 +8,24 @@ const Post = require("../../models/Post");
 const Comment = require("../../models/Comment");
 const User = require("../../models/User");
 
+// Preload post objects on routes with ':post'
+router.param("post", async (req, res, next, slug) => {
+  let post = await Post.findOne({ slug: slug });
+  if (!post) return res.sendStatus(404);
+
+  req.post = post;
+  return next();
+});
+
+// Preload comment objects on routes with ':comment'
+router.param("comment", async (req, res, next, id) => {
+  let comment = await Comment.findById(id);
+  if (!comment) return res.sendStatus(404);
+
+  req.comment = comment;
+  return next();
+});
+
 // @route   GET api/posts
 // @desc    Get List of Posts
 // @access  Public
@@ -45,11 +63,11 @@ router.get("/", async (req, res) => {
       .sort({ createdAt: "desc" })
       .populate("author")
       .exec();
-    let count = await Post.count(query).exec();
+    let count = await Post.estimatedDocumentCount(query).exec();
     let user = req.user ? User.findById(req.user.id) : null;
 
     return res.json({
-      posts: posts.map(article => {
+      posts: posts.map(post => {
         return post.toJSONFor(user);
       }),
       postsCount: count
@@ -82,4 +100,107 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+// get a post
+router.get("/:post", async (req, res) => {
+  try {
+    await req.post.populate("author").execPopulate();
+
+    res.json({ post: req.post.toJSONFor(null) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   POST api/posts/:post/favorite
+// @desc    Favorite a post
+// @access  Private
+router.post("/:post/favorite", auth, async (req, res) => {
+  let postId = req.post._id;
+
+  try {
+    let user = await User.findById(req.user.id);
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    await user.favorite(postId);
+
+    let post = await req.post.updateFavoriteCount();
+
+    res.json({ post: post.toJSONFor(user) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   DELETE api/posts/:post/favorite
+// @desc    Unfavorite a post
+// @access  Private
+router.delete("/:post/favorite", auth, async (req, res) => {
+  let postId = req.post._id;
+
+  try {
+    let user = await User.findById(req.user.id);
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    await user.unfavorite(postId);
+
+    let post = await req.post.updateFavoriteCount();
+
+    res.json({ post: post.toJSONFor(user) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   POST api/posts/:post/comments
+// @desc    Comment on a post
+// @access  Private
+router.post("/:post/comment", auth, async (req, res) => {
+  try {
+    let user = await User.findById(req.user.id);
+    if (!user) {
+      return res.sendStatus(401);
+    }
+
+    let comment = new Comment(req.body.comment);
+    comment.post = req.post;
+    comment.author = req.user;
+
+    await comment.save();
+
+    req.post.comments.push(comment);
+
+    let post = await req.post.save();
+
+    res.json({ comment: comment.toJSONFor(user) });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
 module.exports = router;
+
+// Post routes left
+/*
+get logged in user's own posts    3
+get comments logged in user has created     1
+get comments a user has created by username   2
+
+post a comment to a post      4
+remove a comment from a post      7
+update a comment on a post      5
+get comments for a post     6
+
+update a post   8
+delete a post   9
+favorite a post   10 ---
+unfavorite a post   11  ----
+
+*/
