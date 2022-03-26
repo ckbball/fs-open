@@ -1219,9 +1219,9 @@ minimatch@^3.0.4:
     brace-expansion "^1.1.7"
 
 minimist@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
-  integrity sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
+  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
 
 mongodb@3.5.3:
   version "3.5.3"
@@ -1812,6 +1812,13 @@ sliced@1.0.1:
   resolved "https://registry.yarnpkg.com/sliced/-/sliced-1.0.1.tgz#0b3a662b5d04c3177b1926bea82b03f837a2ef41"
   integrity sha1-CzpmK10Ewxd7GSa+qCsD+Dei70E=
 
+slug@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/slug/-/slug-2.1.1.tgz#08df390d4b4d51bafb41ac0067c0c2dd70734ef2"
+  integrity sha512-yNGhDdS0DR0JyxnPC84qIx/Vd01RHVY4guJeBqBNdBoOLNWnzw5zkWJvxVSmsuUb92bikdnQFnw3PfGY8uZ82g==
+  dependencies:
+    unicode ">= 0.3.1"
+
 sparse-bitfield@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/sparse-bitfield/-/sparse-bitfield-3.0.3.tgz#ff4ae6e68656056ba4b3e792ab3334d38273ca11"
@@ -2023,6 +2030,11 @@ undefsafe@^2.0.2:
   integrity sha512-nrXZwwXrD/T/JXeygJqdCO6NZZ1L66HrxM/Z7mIq2oPanoN0F1nLx3lwJMu6AwJY69hdixaFQOuoYsMjE5/C2A==
   dependencies:
     debug "^2.2.0"
+
+"unicode@>= 0.3.1":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/unicode/-/unicode-14.0.0.tgz#d821f900705787eba935859518d5482e4b7117de"
+  integrity sha512-BjinxTXkbm9Jomp/YBTMGusr4fxIG67fNGShHIRAL16Ur2GJTq2xvLi+sxuiJmInCmwqqev2BCFKyvbfp/yAkg==
 
 unique-string@^1.0.0:
   version "1.0.0"
